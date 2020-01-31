@@ -75,7 +75,7 @@ void Initialize(GLFWwindow* window) {
     g_Suzanne[0].LoadObject("./assets/models/suzanne.obj", g_BasicShader);
     g_Suzanne[1].LoadObject("./assets/models/suzanne.obj", g_BasicShader);
     g_Suzanne[2].LoadObject("./assets/models/suzanne.obj", g_BasicShader);
-    g_Spaceship.LoadObject("./assets/models/spaceship.obj", g_BasicShader);
+    g_Spaceship.LoadObject("./assets/models/Crate1.obj", g_BasicShader);
 
     sb.Init();
 
@@ -118,7 +118,7 @@ void Display(GLFWwindow* window){
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &(scaleMatrix[0]));
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE, &(viewMatrix[0]));
 
-    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 1);
+    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 2);
     g_Suzanne[1].DrawObject();
 
 	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
@@ -158,7 +158,7 @@ void Display(GLFWwindow* window){
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &((translateMatrix * scaleMatrix)[0]));
 
     glBindTexture(GL_TEXTURE0, g_Batman.GetTexture());
-    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 1);
+    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 2);
 
     g_Suzanne[1].DrawObject();
 
@@ -167,7 +167,7 @@ void Display(GLFWwindow* window){
     // Spaceship
     translateMatrix.translate(-0.15, 0, 0);
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &((translateMatrix * scaleMatrix)[0]));
-    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 0);
+    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 1);
 
     g_Spaceship.DrawObject();
 
@@ -199,7 +199,7 @@ void onMotion(GLFWwindow* window, double x, double y) {
         g_Camera.rotate(x, y);
     }
     if (target_on) {
-        g_Camera.change(x, y);
+        // g_Camera.change(x, y);
     }
 }
 

@@ -4,9 +4,10 @@ uniform mat4 u_proj3DMatrix;
 
 attribute vec3 a_position;
 attribute vec3 a_normal;
-attribute vec2 a_tex;
+attribute vec2 a_texcoord;
 
 varying vec3 v_normal;
+varying vec2 v_texcoord;
 varying vec3 v_modPos;
 
 mat4 inverse(mat4 m) {
@@ -64,5 +65,6 @@ void main(void) {
   vec4 mp = modelViewMatrix * vec4(a_position, 1.0);
   v_normal = (transpose(inverse(modelViewMatrix)) * vec4(a_normal, 0.0)).xyz;
   v_modPos = mp.xyz;
+  v_texcoord = a_texcoord;
   gl_Position = projectionMatrix * mp;
 }

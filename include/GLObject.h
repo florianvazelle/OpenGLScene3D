@@ -1,4 +1,7 @@
 #include <GL/glew.h>
+#include <map>
+#include <string>
+
 #include "GLShader.h"
 
 class GLObject {
@@ -25,6 +28,7 @@ class GLObject {
             float diffuse[3];
             float specular[3];
             float shininess;
+            std::string diffuse_texname;
         };
 
     private:
@@ -32,4 +36,5 @@ class GLObject {
         uint32_t shader;
         std::vector<GLushort> indices;
         std::vector<Material> mats;
+        std::map<std::string, GLuint> textures;
 };
