@@ -1,4 +1,4 @@
-uniform int u_hasTex;
+uniform int u_type;
 
 uniform vec3 lightPos;
 uniform vec3 ambientColor;
@@ -31,9 +31,9 @@ vec3 specular(vec3 N, vec3 L) {
 }
 
 void main() {
-  if (u_hasTex == 1) {
+  if (u_type == 1) {
     gl_FragColor = texture2D(u_TextureSampler, v_texcoord);
-  } else if (u_hasTex == 2) {
+  } else if (u_type == 2) {
     gl_FragColor = vec4(v_normal, 1.0);
   } else {
     vec3 N = normalize(v_normal);

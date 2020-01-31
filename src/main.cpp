@@ -23,7 +23,7 @@ GLObject g_Suzanne[3], g_Spaceship;
 GLCamera g_Camera;
 GLTexture g_Batman;
 
-FrameBufferObject g_FBO;
+FrameBufferObject g_FBO[2];
 
 Skybox sb;
 
@@ -79,8 +79,11 @@ void Initialize(GLFWwindow* window) {
 
     sb.Init();
 
-    g_FBO.Init(window);
-    g_FBO.InitColorBuffer();
+    g_FBO[0].Init(window);
+    g_FBO[0].InitColorBuffer();
+
+    g_FBO[1].Init(window);
+    g_FBO[1].InitColorBuffer();
 }
 
 void Shutdown() {
@@ -91,7 +94,8 @@ void Shutdown() {
     g_BasicShader.Destroy();
 
     sb.Destroy();
-    g_FBO.Destroy();
+    g_FBO[0].Destroy();
+    g_FBO[1].Destroy();
 }
 
 void Display(GLFWwindow* window){
@@ -104,8 +108,8 @@ void Display(GLFWwindow* window){
     Mat4 scaleMatrix, rotateMatrix, translateMatrix;
     Mat4 viewMatrix = g_Camera.viewMatrix();
 
-    // On dessine dans ma fenetre
-	glBindFramebuffer(GL_FRAMEBUFFER, g_FBO.getID());
+    // Premier FrameBuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, g_FBO[0].getID());
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
@@ -118,12 +122,29 @@ void Display(GLFWwindow* window){
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &(scaleMatrix[0]));
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE, &(viewMatrix[0]));
 
-    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 2);
+    glUniform1i(glGetUniformLocation(basic, "u_type"), 2);
+    g_Suzanne[1].DrawObject();
+
+    // Second FrameBuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, g_FBO[1].getID());
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+
+	glViewport(0, 0, width, height);
+	glClearColor(1.f, 0.f, 0.5f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    scaleMatrix.scale(0.05f, 0.05f, 0.05f);
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &(scaleMatrix[0]));
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE, &(viewMatrix[0]));
+
+    glUniform1i(glGetUniformLocation(basic, "u_type"), 2);
     g_Suzanne[1].DrawObject();
 
 	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
-    // On dessine dans la fenetre de base
+    // On dessine dans le FrameBuffer de base
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -149,7 +170,7 @@ void Display(GLFWwindow* window){
 
     static GLfloat lightPos[3] = { -5.0, 5.0, 5.0 };
     glUniform3fv(glGetUniformLocation(basic, "lightPos"), 1, lightPos);
-    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 0);
+    glUniform1i(glGetUniformLocation(basic, "u_type"), 0);
 
     g_Suzanne[0].DrawObject();
 
@@ -158,7 +179,7 @@ void Display(GLFWwindow* window){
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &((translateMatrix * scaleMatrix)[0]));
 
     glBindTexture(GL_TEXTURE0, g_Batman.GetTexture());
-    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 2);
+    glUniform1i(glGetUniformLocation(basic, "u_type"), 2);
 
     g_Suzanne[1].DrawObject();
 
@@ -167,7 +188,7 @@ void Display(GLFWwindow* window){
     // Spaceship
     translateMatrix.translate(-0.15, 0, 0);
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &((translateMatrix * scaleMatrix)[0]));
-    glUniform1i(glGetUniformLocation(basic, "u_hasTex"), 1);
+    glUniform1i(glGetUniformLocation(basic, "u_type"), 1);
 
     g_Spaceship.DrawObject();
 
@@ -177,7 +198,8 @@ void Display(GLFWwindow* window){
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-    g_FBO.DrawColorBuffer(width, height);
+    g_FBO[0].DrawColorBuffer(width, height, {-0.75, 0.75, 0});
+    g_FBO[1].DrawColorBuffer(width, height, {0.75, 0.75, 0}, 2);
 }
 
 void onMouse(GLFWwindow* window, int button, int state, int mods) {
@@ -199,7 +221,7 @@ void onMotion(GLFWwindow* window, double x, double y) {
         g_Camera.rotate(x, y);
     }
     if (target_on) {
-        // g_Camera.change(x, y);
+        g_Camera.change(x, y);
     }
 }
 
@@ -212,6 +234,8 @@ void onKey(GLFWwindow *window, int key, int scancode, int action, int mods) {
         g_Camera.focus({0, 0, 0});
     } else if(key == GLFW_KEY_2 && action == GLFW_PRESS) {
         g_Camera.focus({0.15, 0, 0});
+    } else if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+      g_Camera.focus({-0.15, 0, 0});
     }
 }
 

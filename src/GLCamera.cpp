@@ -6,11 +6,13 @@ GLCamera::GLCamera() {
     m_phi = 0.0f;
     m_theta = 0.0f;
 
-    lastX = 1079 / 2;
-    lastY = 940 / 2;
+    lastX = width / 2;
+    lastY = height / 2;
     yaw = -90.0f;
 
     m_focus = { 0, 0, 0 };
+    eye = { 0, 0, 3 };
+    lookat = { 0, 0, 0 };
 }
 
 void GLCamera::rotate(float x, float y) {
@@ -35,23 +37,31 @@ void GLCamera::rotate(float x, float y) {
     m_theta = pitch * (M_PI / 180);
 }
 
-void GLCamera::zoom(float distance) { m_radius -= distance; }
+void GLCamera::change(float x, float y) {
+	eye.x -= transScale * (x - lastX) / (float)width;
+	lookat.x -= transScale * (x - lastX) / (float)width;
+	eye.y += transScale * (y - lastY) / (float)height;
+	lookat.y += transScale * (y - lastY) / (float)height;
 
-  Mat4 GLCamera::viewMatrix() {
-    Vector3f camPos = {0, 0, 3};
-    camPos.x = m_radius * cos(m_theta) * cos(m_phi);
-    camPos.y = m_radius * sin(m_theta);
-    camPos.z = m_radius * cos(m_theta) * sin(m_phi);
+	lastX = x;
+	lastY = y;
+}
 
-    Vector3f camTarget = m_focus;
-    Vector3f up = {0, 1, 0};
+void GLCamera::zoom(float distance) {
+	m_radius -= distance;
+}
+
+Mat4 GLCamera::viewMatrix() {
+    eye.x = m_radius * cos(m_theta) * cos(m_phi);
+    eye.y = m_radius * sin(m_theta);
+    eye.z = m_radius * cos(m_theta) * sin(m_phi);
 
     Mat4 viewMatrix;
-    viewMatrix.lookAt(camPos, camTarget, up);
+    viewMatrix.lookAt(eye, lookat, {0, 1, 0});
 
     return viewMatrix;
 }
 
 void GLCamera::focus(Vector3f v) {
-    m_focus = v;
+    lookat = v;
 }

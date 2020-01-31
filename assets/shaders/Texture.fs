@@ -2,6 +2,7 @@
 varying vec2 v_texcoords;
 uniform sampler2D u_TextureSampler;
 uniform vec2 dimensions;
+uniform int u_type;
 
 void main(void) {
 	bool useBlackWhite = false;
@@ -11,13 +12,13 @@ void main(void) {
 	vec4 texColor = texture2D(u_TextureSampler, v_texcoords);
 	
 	// Noir et blanc
-	if (useBlackWhite) {
+	if (u_type == 1) {
 		float moyenne = (texColor.r + texColor.g + texColor.b) / 3.0;
 		vec4 color = (moyenne < 0.5) ? vec4(1.0, 1.0, 1.0, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);	
 	} else
 
 	// Sepia
-	if (useSepia) {
+	if (u_type == 2) {
 		vec4 sepia = vec4(
 			dot(texColor.rgb, vec3(0.393, 0.769, 0.189)),
 			dot(texColor.rgb, vec3(0.349, 0.686, 0.168)),
@@ -28,7 +29,7 @@ void main(void) {
 		gl_FragColor = sepia;
 	} else
 
-	if (useConvolution) {
+	if (u_type == 3) {
 		float right = 1.0 / dimensions[0];
 		float left = -1.0 / dimensions[0];
 

@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "GLShader.h"
+#include "Vector3f.h"
 
 class FrameBufferObject {
     private:
@@ -12,7 +13,7 @@ class FrameBufferObject {
     public:
         void Init(GLFWwindow* window);
         void InitColorBuffer();
-        void DrawColorBuffer(int width, int height);
+        void DrawColorBuffer(int width, int height, Vector3f pos, int type = 0);
         void Destroy();
 
         GLuint getID(void) const { return FBO; }

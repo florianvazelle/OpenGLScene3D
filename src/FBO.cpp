@@ -51,7 +51,7 @@ void FrameBufferObject::Init(GLFWwindow* window) {
 }
 
 void FrameBufferObject::InitColorBuffer() {
-    const float triangles[] = {
+	const float triangles[] = {
 		-0.5f, -0.5f, /*uv*/0.f, 0.f,
 		-0.5f, +0.5f, /*uv*/0.f, 1.f,
 		+0.5f, +0.5f, /*uv*/1.f, 1.f,
@@ -85,7 +85,7 @@ void FrameBufferObject::InitColorBuffer() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void FrameBufferObject::DrawColorBuffer(int width, int height) {
+void FrameBufferObject::DrawColorBuffer(int width, int height, Vector3f pos, int type) {
     auto program = g_TextureShader.GetProgram();
     glUseProgram(program);
 
@@ -94,10 +94,11 @@ void FrameBufferObject::DrawColorBuffer(int width, int height) {
 
     GLfloat dimensions[2] = { (float)width, (float)height };
     glUniform2fv(glGetUniformLocation(program, "dimensions"), 1, dimensions);
+    glUniform1i(glGetUniformLocation(program, "u_type"), type);
 
-	Mat4 scale, trans;
-	scale.scale(0.5, 0.5, 1);
-	trans.translate(-0.75, 0.75, 0);
+    Mat4 scale, trans;
+    scale.scale(0.5, 0.5, 1);
+    trans.translate(pos.x, pos.y, pos.z);
     glUniformMatrix4fv(glGetUniformLocation(program, "u_modelMatrix"), 1, GL_FALSE, &((trans * scale)[0]));
 
     glBindVertexArray(VAO);
