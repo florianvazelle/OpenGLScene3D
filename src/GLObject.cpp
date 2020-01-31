@@ -138,12 +138,9 @@ void GLObject::LoadObject(const char* filename, GLShader g_BasicShader) {
     glEnableVertexAttribArray(loc_normal);
     glEnableVertexAttribArray(loc_tex);
 
-    glVertexAttribPointer(loc_position, 3, GL_FLOAT, false, sizeof(Vertex),
-                            0);
-    glVertexAttribPointer(loc_normal, 3, GL_FLOAT, false, sizeof(Vertex),
-                            (const void *)offsetof(Vertex, nx));
-    glVertexAttribPointer(loc_tex, 2, GL_FLOAT, false, sizeof(Vertex),
-                            (const void *)offsetof(Vertex, texX));
+    glVertexAttribPointer(loc_position, 3, GL_FLOAT, false, sizeof(Vertex), 0);
+    glVertexAttribPointer(loc_normal, 3, GL_FLOAT, false, sizeof(Vertex), (const void *)offsetof(Vertex, nx));
+    glVertexAttribPointer(loc_tex, 2, GL_FLOAT, false, sizeof(Vertex), (const void *)offsetof(Vertex, texX));
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -173,4 +170,8 @@ void GLObject::DestroyObject() {
     glDeleteBuffers(1, &m_vbo);
     glDeleteBuffers(1, &m_ibo);
     glDeleteVertexArrays(1, &m_vao);
+
+    for (const auto &tex : textures) {
+      glDeleteTextures(1, &tex.second);
+    }
 }
