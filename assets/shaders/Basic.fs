@@ -32,7 +32,23 @@ vec3 specular(vec3 N, vec3 L) {
 
 void main() {
   if (u_type == 1) {
-    gl_FragColor = texture2D(u_TextureSampler, v_texcoord);
+    const vec4 lum_diffus = vec4(1, 1, 0.9, 1);
+    const vec4 lum_amb = vec4(0.8, 0.8, 1, 1);
+    const vec4 lum_spec = vec4(1, 1, 0.75, 1);
+    const float Iamb = 0.15;
+
+    vec3 L = normalize(v_modPos - lightPos.xyz);
+    float Idiffuse = 0, Ispec = 0;
+    vec4 color = vec4(1);
+    vec3 N = normalize(v_normal);
+
+    vec3 B = cross(normalize(vec3(N.x, 0, N.z)), vec3(0, 1, 0));
+    vec3 T = cross(N, B);
+    Idiffuse = clamp(dot(N, -L), 0, 1);
+
+    color = texture2D(u_TextureSampler, v_texcoord);
+    gl_FragColor = lum_diffus * color * Idiffuse + lum_amb * Iamb * color +
+                   lum_spec * Ispec;
   } else if (u_type == 2) {
     gl_FragColor = vec4(v_normal, 1.0);
   } else {

@@ -76,7 +76,6 @@ void GLObject::LoadObject(const char* filename, GLShader g_BasicShader) {
 
     for (const tinyobj::material_t& material : materials) {
         if (material.diffuse_texname.length() > 0) {
-            // Only load the texture if it is not already loaded
             if (textures.find(material.diffuse_texname) == textures.end()) {
                 GLuint texture_id;
                 int w, h;
@@ -85,12 +84,8 @@ void GLObject::LoadObject(const char* filename, GLShader g_BasicShader) {
                 std::string texture_filename = material.diffuse_texname;
                 unsigned char *image = Load(texture_filename.c_str(), w, h, comp);
                 if (!image) {
-                    std::cerr << "Unable to load texture: " << texture_filename
-                            << std::endl;
                     exit(1);
                 }
-                std::cout << "Loaded texture: " << texture_filename << ", w = " << w
-                            << ", h = " << h << ", comp = " << comp << std::endl;
 
                 glGenTextures(1, &texture_id);
                 glBindTexture(GL_TEXTURE_2D, texture_id);
