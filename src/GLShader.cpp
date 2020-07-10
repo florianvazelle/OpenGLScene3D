@@ -1,7 +1,7 @@
 
 #include "GLShader.h"
+#include "Skybox.h"
 #include <GL/glew.h>
-
 
 #include <fstream>
 #include <iostream>
@@ -110,7 +110,6 @@ bool GLShader::LoadFragmentShader(const char *filename) {
 bool GLShader::Create() {
   m_Program = glCreateProgram();
   glAttachShader(m_Program, m_VertexShader);
-  glAttachShader(m_Program, m_GeometryShader);
   glAttachShader(m_Program, m_FragmentShader);
   glLinkProgram(m_Program);
 

@@ -1,12 +1,14 @@
 #include "GLShader.h"
+#include "Mat4.h"
 #include <GL/glew.h>
 
 class Skybox {
 public:
-  void load_cube_map_sprite_texture(GLuint *_texId, const char *path_sprite[6]);
+  GLuint load_cube_map_sprite_texture(const char *path_sprite[6]);
   void Init();
-  void Draw();
+  void Draw(Mat4, Mat4);
   void Destroy();
+  static void _check_gl_error(const char *file, int line);
 
 private:
   GLShader g_SkyboxShader;

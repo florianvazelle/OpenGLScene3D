@@ -1,8 +1,9 @@
 #include "GLCamera.h"
+#include <GLFW/glfw3.h>
 #include <iostream>
 
 GLCamera::GLCamera() {
-  m_radius = 10.0f;
+  m_radius = 50.0f;
   m_phi = 0.0f;
   m_theta = 0.0f;
 
@@ -54,8 +55,13 @@ Mat4 GLCamera::viewMatrix() {
   eye.y = m_radius * sin(m_theta);
   eye.z = m_radius * cos(m_theta) * sin(m_phi);
 
+  const float radius = 50.0f;
+  float camX = sin(glfwGetTime() / 2);
+  float camZ = cos(glfwGetTime() / 2);
+
   Mat4 viewMatrix;
-  viewMatrix.lookAt(eye, lookat, {0, 1, 0});
+  viewMatrix.lookAt({0.0, 0.0, 0.0}, {camX, 0.0, camZ}, {0, 1, 0});
+  // viewMatrix.lookAt(eye, lookat, {0, 1, 0});
 
   return viewMatrix;
 }

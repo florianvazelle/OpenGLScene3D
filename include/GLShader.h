@@ -23,6 +23,7 @@ public:
   ~GLShader() {}
 
   inline uint32_t GetProgram() { return m_Program; }
+  inline const uint32_t GetProgram() const { return m_Program; }
 
   bool LoadVertexShader(const char *filename);
   bool LoadGeometryShader(const char *filename);

@@ -24,4 +24,6 @@ public:
   void zoom(float distance);
   Mat4 viewMatrix(void);
   void focus(Vector3f);
+
+  float radius() const { return m_radius; };
 };
