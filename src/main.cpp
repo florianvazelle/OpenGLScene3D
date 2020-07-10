@@ -17,6 +17,8 @@
 
 bool arcball_on = false, target_on = false;
 
+GLShader g_BasicShader;
+GLObject g_Suzanne;
 GLCamera g_Camera;
 
 Skybox sb;
@@ -32,10 +34,20 @@ void Initialize(GLFWwindow *window) {
   std::cout << "Vendor : " << glGetString(GL_VENDOR) << std::endl;
   std::cout << "Renderer : " << glGetString(GL_RENDERER) << std::endl;
 
+  g_BasicShader.LoadVertexShader("./assets/shaders/Basic.vs");
+  g_BasicShader.LoadFragmentShader("./assets/shaders/Basic.fs");
+  g_BasicShader.Create();
+
+  g_Suzanne.LoadObject("./assets/models/suzanne.obj", g_BasicShader);
+
   sb.Init();
 }
 
-void Shutdown() { sb.Destroy(); }
+void Shutdown() {
+  g_Suzanne.DestroyObject();
+  g_BasicShader.Destroy();
+  sb.Destroy();
+}
 
 void Display(GLFWwindow *window) {
   int width, height;
@@ -47,6 +59,14 @@ void Display(GLFWwindow *window) {
   glClearColor(0, 0, 0, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  auto basic = g_BasicShader.GetProgram();
+  glUseProgram(basic);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  glDepthMask(GL_TRUE);
+
   Mat4 proj3DMatrix;
   float angle = 4000.0f;
   float near = 0.1f;
@@ -54,6 +74,29 @@ void Display(GLFWwindow *window) {
   float aspect = width / height;
 
   proj3DMatrix.makePerspective((angle * M_PI) / 180, aspect, near, far);
+
+  int locMatrix = glGetUniformLocation(basic, "u_proj3DMatrix");
+  glUniformMatrix4fv(locMatrix, 1, GL_FALSE, &(proj3DMatrix[0]));
+
+  Mat4 scaleMatrix, translateMatrix;
+  scaleMatrix.scale(0.15f, 0.15f, 0.15f);
+  glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE,
+                     &(scaleMatrix[0]));
+  glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE,
+                     &(viewMatrix[0]));
+
+  Vector3f eye = g_Camera.eyePos();
+  glUniform3f(glGetUniformLocation(basic, "cameraPos"), eye.x, eye.y, eye.z);
+
+  glBindTexture(GL_TEXTURE_CUBE_MAP, sb.getSpaceTexId());
+
+  static GLfloat lightPos[3] = {-5.0, 5.0, 5.0};
+  glUniform3fv(glGetUniformLocation(basic, "lightPos"), 1, lightPos);
+  glUniform1i(glGetUniformLocation(basic, "u_type"), 0);
+
+  glUniform1i(glGetUniformLocation(basic, "u_type"), 2);
+  g_Suzanne.DrawObject();
+
   sb.Draw(viewMatrix, proj3DMatrix);
 }
 

@@ -1,11 +1,13 @@
 uniform int u_type;
 
+uniform vec3 cameraPos;
 uniform vec3 lightPos;
 uniform vec3 ambientColor;
 uniform vec3 diffuseColor;
 uniform vec3 specColor;
 uniform float shininess;
 uniform sampler2D u_TextureSampler;
+uniform samplerCube skybox;
 
 varying vec3 v_normal;
 varying vec2 v_texcoord;
@@ -50,7 +52,9 @@ void main() {
     gl_FragColor = lum_diffus * color * Idiffuse + lum_amb * Iamb * color +
                    lum_spec * Ispec;
   } else if (u_type == 2) {
-    gl_FragColor = vec4(v_normal, 1.0);
+    vec3 I = normalize(v_modPos - cameraPos);
+    vec3 R = reflect(I, normalize(v_normal));
+    gl_FragColor = vec4(textureCube(skybox, R).rgb, 1.0);
   } else {
     vec3 N = normalize(v_normal);
     vec3 L = lightPos - v_modPos;
@@ -58,10 +62,9 @@ void main() {
     distance = distance * distance;
     L = normalize(L);
 
-    vec3 colorLinear =
-        ambientColor +
-        diffuse(N, L) * lightColor * lightPower / distance +
-        specular(N, L) * lightColor * lightPower / distance;
+    vec3 colorLinear = ambientColor +
+                       diffuse(N, L) * lightColor * lightPower / distance +
+                       specular(N, L) * lightColor * lightPower / distance;
     vec3 colorGammaCorrected = pow(colorLinear, vec3(1.0 / screenGamma));
     gl_FragColor = vec4(colorGammaCorrected, 1.0);
   }

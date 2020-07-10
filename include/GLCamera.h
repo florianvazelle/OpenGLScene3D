@@ -26,4 +26,5 @@ public:
   void focus(Vector3f);
 
   float radius() const { return m_radius; };
+  Vector3f eyePos() const { return eye; };
 };
