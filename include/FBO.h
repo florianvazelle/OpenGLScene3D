@@ -14,6 +14,7 @@ public:
   void Init(GLFWwindow *window);
   void InitColorBuffer();
   void DrawColorBuffer(int width, int height, Vector3f pos, int type = 0);
+  void DrawDepthBuffer(int width, int height, Vector3f pos, int type = 0);
   void Destroy();
 
   GLuint getID(void) const { return FBO; }

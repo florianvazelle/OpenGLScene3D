@@ -138,7 +138,6 @@ void Skybox::Draw(Mat4 viewMatrix, Mat4 proj3DMatrix) {
   auto shader = g_SkyboxShader.GetProgram();
   glUseProgram(shader);
 
-  viewMatrix.translate(0, 0, 0);
   glUniformMatrix4fv(glGetUniformLocation(shader, "u_viewMatrix"), 1, GL_FALSE,
                      &(viewMatrix[0]));
 

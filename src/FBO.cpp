@@ -128,6 +128,41 @@ void FrameBufferObject::DrawColorBuffer(int width, int height, Vector3f pos,
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void FrameBufferObject::DrawDepthBuffer(int width, int height, Vector3f pos,
+                                        int type) {
+  auto program = g_TextureShader.GetProgram();
+  glUseProgram(program);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, m_depthbuffer);
+
+  GLfloat dimensions[2] = {(float)width, (float)height};
+  glUniform2fv(glGetUniformLocation(program, "dimensions"), 1, dimensions);
+
+  // Mat4 depthProjectionMatrix;
+  // depthProjectionMatrix.ortho(-10, 10, -10, 10, -10, 20);
+
+  // Mat4 depthViewMatrix;
+  // depthViewMatrix.lookAt({5.0f, -5.0f, -5.0f}, {0, 0, 0}, {0, 1, 0});
+
+  // Mat4 depthMVP = depthProjectionMatrix * depthViewMatrix;
+  // glUniformMatrix4fv(glGetUniformLocation(program, "u_depthMVP"), 1,
+  // GL_FALSE,
+  //                    &(depthMVP[0]));
+
+  Mat4 scale, trans;
+  scale.scale(0.5, 0.5, 1);
+  trans.translate(pos.x, pos.y, pos.z);
+  glUniformMatrix4fv(glGetUniformLocation(program, "u_modelMatrix"), 1,
+                     GL_FALSE, &((trans * scale)[0]));
+
+  glBindVertexArray(VAO);
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+  glBindVertexArray(0);
+
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void FrameBufferObject::Destroy() {
   glDeleteBuffers(1, &VBO);
   glDeleteVertexArrays(1, &VAO);

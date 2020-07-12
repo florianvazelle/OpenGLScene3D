@@ -22,6 +22,7 @@ GLObject g_Suzanne;
 GLCamera g_Camera;
 
 Skybox sb;
+FrameBufferObject g_FBO;
 
 void Initialize(GLFWwindow *window) {
   GLenum error = glewInit();
@@ -41,31 +42,25 @@ void Initialize(GLFWwindow *window) {
   g_Suzanne.LoadObject("./assets/models/suzanne.obj", g_BasicShader);
 
   sb.Init();
+
+  g_FBO.Init(window);
+  g_FBO.InitColorBuffer();
 }
 
 void Shutdown() {
   g_Suzanne.DestroyObject();
   g_BasicShader.Destroy();
   sb.Destroy();
+  g_FBO.Destroy();
 }
 
 void Display(GLFWwindow *window) {
   int width, height;
   glfwGetWindowSize(window, &width, &height);
 
-  Mat4 viewMatrix = g_Camera.viewMatrix();
-
-  glViewport(0, 0, width, height);
-  glClearColor(0, 0, 0, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   auto basic = g_BasicShader.GetProgram();
-  glUseProgram(basic);
 
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glEnable(GL_CULL_FACE);
-  glEnable(GL_DEPTH_TEST);
-  glDepthMask(GL_TRUE);
+  Mat4 viewMatrix = g_Camera.viewMatrix();
 
   Mat4 proj3DMatrix;
   float angle = 4000.0f;
@@ -75,29 +70,93 @@ void Display(GLFWwindow *window) {
 
   proj3DMatrix.makePerspective((angle * M_PI) / 180, aspect, near, far);
 
-  int locMatrix = glGetUniformLocation(basic, "u_proj3DMatrix");
-  glUniformMatrix4fv(locMatrix, 1, GL_FALSE, &(proj3DMatrix[0]));
+  {
+    // Suzanne
+    glUseProgram(basic);
 
-  Mat4 scaleMatrix, translateMatrix;
-  scaleMatrix.scale(0.15f, 0.15f, 0.15f);
-  glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE,
-                     &(scaleMatrix[0]));
-  glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE,
-                     &(viewMatrix[0]));
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
 
-  Vector3f eye = g_Camera.eyePos();
-  glUniform3f(glGetUniformLocation(basic, "cameraPos"), eye.x, eye.y, eye.z);
+    glViewport(0, 0, width, height);
+    glClearColor(1.f, 0.f, 0.5f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glBindTexture(GL_TEXTURE_CUBE_MAP, sb.getSpaceTexId());
+    int locMatrix = glGetUniformLocation(basic, "u_proj3DMatrix");
+    glUniformMatrix4fv(locMatrix, 1, GL_FALSE, &(proj3DMatrix[0]));
 
-  static GLfloat lightPos[3] = {-5.0, 5.0, 5.0};
-  glUniform3fv(glGetUniformLocation(basic, "lightPos"), 1, lightPos);
-  glUniform1i(glGetUniformLocation(basic, "u_type"), 0);
+    Mat4 scaleMatrix, translateMatrix;
+    scaleMatrix.scale(0.15f, 0.15f, 0.15f);
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1,
+                       GL_FALSE, &(scaleMatrix[0]));
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE,
+                       &(viewMatrix[0]));
 
-  glUniform1i(glGetUniformLocation(basic, "u_type"), 2);
-  g_Suzanne.DrawObject();
+    Vector3f eye = g_Camera.eyePos();
+    glUniform3f(glGetUniformLocation(basic, "cameraPos"), eye.x, eye.y, eye.z);
 
+    glBindTexture(GL_TEXTURE_CUBE_MAP, sb.getSpaceTexId());
+
+    static GLfloat lightPos[3] = {-5.0, 5.0, 5.0};
+    glUniform3fv(glGetUniformLocation(basic, "lightPos"), 1, lightPos);
+
+    g_Suzanne.DrawObject();
+  }
+
+  {
+    // Premier FrameBuffer
+    glUseProgram(basic);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, g_FBO.getID());
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+
+    glViewport(0, 0, width, height);
+    glClearColor(1.f, 0.f, 0.5f, 1.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    Mat4 depthProjectionMatrix;
+    depthProjectionMatrix.ortho(-10, 10, -10, 10, -10, 20);
+
+    Mat4 depthViewMatrix;
+    depthViewMatrix.lookAt({5.0f, -5.0f, -5.0f}, {0, 0, 0}, {0, 1, 0});
+
+    int locMatrix = glGetUniformLocation(basic, "u_proj3DMatrix");
+    glUniformMatrix4fv(locMatrix, 1, GL_FALSE, &(depthProjectionMatrix[0]));
+
+    Mat4 scaleMatrix, translateMatrix;
+    scaleMatrix.scale(5, 5, 5);
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1,
+                       GL_FALSE, &(scaleMatrix[0]));
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE,
+                       &(depthViewMatrix[0]));
+
+    Vector3f eye = g_Camera.eyePos();
+    glUniform3f(glGetUniformLocation(basic, "cameraPos"), eye.x, eye.y, eye.z);
+
+    glBindTexture(GL_TEXTURE_CUBE_MAP, sb.getSpaceTexId());
+
+    static GLfloat lightPos[3] = {5.0, -5.0, -5.0};
+    glUniform3fv(glGetUniformLocation(basic, "lightPos"), 1, lightPos);
+
+    g_Suzanne.DrawObject();
+  }
+
+  // En dernier la skybox
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glEnable(GL_CULL_FACE);
+  glEnable(GL_DEPTH_TEST);
+  glDepthMask(GL_TRUE);
   sb.Draw(viewMatrix, proj3DMatrix);
+
+  // rendu 2D
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_DEPTH_TEST);
+  glDepthMask(GL_FALSE);
+  g_FBO.DrawDepthBuffer(width, height, {-0.75, 0.75, 0});
+  glDepthMask(GL_TRUE);
 }
 
 void onMouse(GLFWwindow *window, int button, int state, int mods) {
