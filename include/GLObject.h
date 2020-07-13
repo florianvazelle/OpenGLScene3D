@@ -6,7 +6,7 @@
 
 class GLObject {
 public:
-  void LoadObject(const char *filename, GLShader g_BasicShader);
+  void LoadObject(const char *filename, const GLShader &g_BasicShader);
   void DrawObject(void);
   void DestroyObject(void);
   GLuint GetObject(void) const { return m_vao; };

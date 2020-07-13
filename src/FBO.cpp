@@ -31,8 +31,10 @@ void FrameBufferObject::Init(GLFWwindow *window) {
   glGenTextures(1, &m_depthbuffer);
   glBindTexture(GL_TEXTURE_2D, m_depthbuffer);
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   // Depth Buffer
   glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, width, height, 0,
@@ -41,8 +43,11 @@ void FrameBufferObject::Init(GLFWwindow *window) {
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
                          m_depthbuffer, 0);
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  glDrawBuffer(GL_NONE); // tres important, autrement FBO non complet!
+  glReadBuffer(GL_NONE);
+
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
   //_check_gl_error("TroisiemeProjet", 210);
@@ -138,17 +143,6 @@ void FrameBufferObject::DrawDepthBuffer(int width, int height, Vector3f pos,
 
   GLfloat dimensions[2] = {(float)width, (float)height};
   glUniform2fv(glGetUniformLocation(program, "dimensions"), 1, dimensions);
-
-  // Mat4 depthProjectionMatrix;
-  // depthProjectionMatrix.ortho(-10, 10, -10, 10, -10, 20);
-
-  // Mat4 depthViewMatrix;
-  // depthViewMatrix.lookAt({5.0f, -5.0f, -5.0f}, {0, 0, 0}, {0, 1, 0});
-
-  // Mat4 depthMVP = depthProjectionMatrix * depthViewMatrix;
-  // glUniformMatrix4fv(glGetUniformLocation(program, "u_depthMVP"), 1,
-  // GL_FALSE,
-  //                    &(depthMVP[0]));
 
   Mat4 scale, trans;
   scale.scale(0.5, 0.5, 1);

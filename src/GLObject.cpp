@@ -15,7 +15,7 @@
 #include "GLObject.h"
 #include "Utils.h"
 
-void GLObject::LoadObject(const char *filename, GLShader g_BasicShader) {
+void GLObject::LoadObject(const char *filename, const GLShader &g_BasicShader) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;
@@ -156,7 +156,6 @@ void GLObject::DrawObject() {
                  mats[0].specular);
     glUniform1f(glGetUniformLocation(shader, "shininess"), mats[0].shininess);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
     std::string diffuse_texname = mats[0].diffuse_texname;
     if (textures.find(diffuse_texname) != textures.end()) {
       glBindTexture(GL_TEXTURE_2D, textures[diffuse_texname]);

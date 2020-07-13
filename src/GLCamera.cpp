@@ -60,7 +60,7 @@ Mat4 GLCamera::viewMatrix() {
   float camZ = cos(glfwGetTime() / 2);
 
   Mat4 viewMatrix;
-  viewMatrix.lookAt({camX, 0.0, camZ}, {0.0, 0.0, 0.0}, {0, 1, 0});
+  viewMatrix.lookAt({camX, 0.5, camZ}, {0.0, 0.0, 0.0}, {0, 1, 0});
   // viewMatrix.lookAt(eye, lookat, {0, 1, 0});
 
   return viewMatrix;

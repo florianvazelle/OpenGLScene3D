@@ -34,7 +34,6 @@ public:
 
   void lookAt(Vector3f, Vector3f, Vector3f);
 
-private:
   float data[16];
 };
 

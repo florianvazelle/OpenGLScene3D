@@ -18,4 +18,5 @@ public:
   void Destroy();
 
   GLuint getID(void) const { return FBO; }
+  GLuint getDepth(void) const { return m_depthbuffer; }
 };
