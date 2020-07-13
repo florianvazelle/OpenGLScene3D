@@ -41,10 +41,24 @@ void main() {
   float bias = 0.005 * tan(acos(dot(N, L)));
   bias = clamp(bias, 0, 0.01);
 
-  float visibility = 1.0;
-  if (texture(shadowMap, ShadowCoord.xy).z < ShadowCoord.z - bias) {
-    visibility = 0.5;
+  // float visibility = 1.0;
+  // if (texture(shadowMap, ShadowCoord.xy).z < ShadowCoord.z - bias) {
+  //   visibility = 0.5;
+  // }
+
+  // Percentage Close Filter
+  float visibility = 0.0;
+  vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+  for (int x = -1; x <= 1; ++x) {
+    for (int y = -1; y <= 1; ++y) {
+      float pcfDepth =
+          texture(shadowMap, ShadowCoord.xy + vec2(x, y) * texelSize).z;
+      visibility += ShadowCoord.z > pcfDepth ? 0.5 : 0.0;
+    }
   }
+  visibility /= 9.0;
+
+  visibility = 1.0 - visibility;
 
   float distance = length(L);
   distance = distance * distance;
@@ -52,8 +66,7 @@ void main() {
 
   vec3 colorLinear =
       ambientColor +
-      (diffuse(N, L) * lightColor * lightPower / distance) * visibility +
-      (specular(N, L) * lightColor * lightPower / distance) * visibility;
+      (diffuse(N, L) * lightColor * lightPower / distance) * visibility;
   vec3 colorGammaCorrected = pow(colorLinear, vec3(1.0 / screenGamma));
   FragColor = vec4(colorGammaCorrected, 1.0);
 }

@@ -67,7 +67,7 @@ void Display(GLFWwindow *window) {
 
   const Vector3f eye = g_Camera.eyePos();
 
-  const GLfloat cameraPos[3] = {eye.x, eye.y, eye.z};
+  const GLfloat cameraPos[3] = {eye.x + 20, eye.y, eye.z + 20};
   const GLfloat lightPos[3] = {-2.0f, 4.0f, -1.0f};
 
   float angle = 4000.0f;
@@ -80,8 +80,9 @@ void Display(GLFWwindow *window) {
   viewMatrix = g_Camera.viewMatrix();
 
   Mat4 depthViewMatrix, depthProjectionMatrix;
-  depthProjectionMatrix.ortho(-1, 1, -1, 1, 1.0f, 7.5f);
-  depthViewMatrix.lookAt({lightPos[0], lightPos[1], lightPos[2]}, {0, 0, 0}, {0, 1, 0});
+  depthProjectionMatrix.ortho(-2, 2, -2, 2, 2.0f, 7.5f);
+  depthViewMatrix.lookAt({lightPos[0], lightPos[1], lightPos[2]}, {0, 0, 0},
+                         {0, 1, 0});
 
   Mat4 bias;
   bias.data[0] = 0.5;
@@ -102,18 +103,22 @@ void Display(GLFWwindow *window) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, g_FBO.getID());
     glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT); // Peter panning
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
     glViewport(0, 0, width, height);
     glClear(GL_DEPTH_BUFFER_BIT);
 
-    glUniformMatrix4fv(glGetUniformLocation(basic, "u_proj3DMatrix"), 1, GL_FALSE, &(depthProjectionMatrix[0]));
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_proj3DMatrix"), 1,
+                       GL_FALSE, &(depthProjectionMatrix[0]));
 
     Mat4 scaleMatrix;
-    scaleMatrix.scale(0.5f, 0.5f, 0.5f);
-    glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &(scaleMatrix[0]));
-    glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE, &(depthViewMatrix[0]));
+    // scaleMatrix.scale(0.5f, 0.5f, 0.5f);
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1,
+                       GL_FALSE, &(scaleMatrix[0]));
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE,
+                       &(depthViewMatrix[0]));
 
     g_Suzanne[1].DrawObject();
   }
@@ -125,6 +130,7 @@ void Display(GLFWwindow *window) {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
 
@@ -132,14 +138,19 @@ void Display(GLFWwindow *window) {
     glClearColor(1.f, 0.f, 0.5f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUniformMatrix4fv(glGetUniformLocation(basic, "u_proj3DMatrix"), 1, GL_FALSE, &(proj3DMatrix[0]));
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_proj3DMatrix"), 1,
+                       GL_FALSE, &(proj3DMatrix[0]));
 
     Mat4 scaleMatrix;
-    scaleMatrix.scale(0.5f, 0.5f, 0.5f);
-    glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &(scaleMatrix[0]));
-    glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE, &(viewMatrix[0]));
+    // scaleMatrix.scale(0.5f, 0.5f, 0.5f);
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1,
+                       GL_FALSE, &(scaleMatrix[0]));
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE,
+                       &(viewMatrix[0]));
 
-    glUniformMatrix4fv(glGetUniformLocation(basic, "u_depthMVP"), 1, GL_FALSE, &((bias * (depthProjectionMatrix * depthViewMatrix))[0]));
+    glUniformMatrix4fv(
+        glGetUniformLocation(basic, "u_depthMVP"), 1, GL_FALSE,
+        &((bias * (depthProjectionMatrix * depthViewMatrix))[0]));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, g_FBO.getDepth());
