@@ -42,8 +42,8 @@ void main() {
   bias = clamp(bias, 0, 0.01);
 
   float visibility = 1.0;
-  if (texture2D(shadowMap, ShadowCoord.xy).z < ShadowCoord.z - bias) {
-    visibility = 0;
+  if (texture(shadowMap, ShadowCoord.xy).z < ShadowCoord.z - bias) {
+    visibility = 0.5;
   }
 
   float distance = length(L);

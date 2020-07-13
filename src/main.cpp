@@ -81,8 +81,7 @@ void Display(GLFWwindow *window) {
 
   Mat4 depthViewMatrix, depthProjectionMatrix;
   depthProjectionMatrix.ortho(-1, 1, -1, 1, 1.0f, 7.5f);
-  depthViewMatrix.lookAt({lightPos[0], lightPos[1], lightPos[2]}, {0, 0, 0},
-                         {0, 1, 0});
+  depthViewMatrix.lookAt({lightPos[0], lightPos[1], lightPos[2]}, {0, 0, 0}, {0, 1, 0});
 
   Mat4 bias;
   bias.data[0] = 0.5;
@@ -135,12 +134,12 @@ void Display(GLFWwindow *window) {
 
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_proj3DMatrix"), 1, GL_FALSE, &(proj3DMatrix[0]));
 
-    Mat4 scaleMatrix, scaleMatrix2;
+    Mat4 scaleMatrix;
     scaleMatrix.scale(0.5f, 0.5f, 0.5f);
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_modelMatrix"), 1, GL_FALSE, &(scaleMatrix[0]));
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE, &(viewMatrix[0]));
 
-    glUniformMatrix4fv(glGetUniformLocation(basic, "u_depthMVP"), 1, GL_FALSE, &(((bias * (depthProjectionMatrix * depthViewMatrix)))[0]));
+    glUniformMatrix4fv(glGetUniformLocation(basic, "u_depthMVP"), 1, GL_FALSE, &((bias * (depthProjectionMatrix * depthViewMatrix))[0]));
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, g_FBO.getDepth());
