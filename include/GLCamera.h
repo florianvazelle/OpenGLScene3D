@@ -2,26 +2,29 @@
 #include "Vector3f.h"
 
 class GLCamera {
-    private:
-        float m_theta;
-        float m_phi;
-        float m_radius;
+private:
+  float m_theta;
+  float m_phi;
+  float m_radius;
 
-        const int width = 1079, height = 940;
-        const float transScale = 0.5f;
+  const int width = 1079, height = 940;
+  const float transScale = 0.5f;
 
-        float lastX, lastY;
-        float yaw, pitch;
+  float lastX, lastY;
+  float yaw, pitch;
 
-        Vector3f m_focus;
-        Vector3f eye, lookat;
+  Vector3f m_focus;
+  Vector3f eye, lookat;
 
-      public:
-        GLCamera();
+public:
+  GLCamera();
 
-        void rotate(float x, float y);
-        void change(float x, float y);
-        void zoom(float distance);
-        Mat4 viewMatrix(void);
-        void focus(Vector3f);
+  void rotate(float x, float y);
+  void change(float x, float y);
+  void zoom(float distance);
+  Mat4 viewMatrix(void);
+  void focus(Vector3f);
+
+  float radius() const { return m_radius; };
+  Vector3f eyePos() const { return eye; };
 };

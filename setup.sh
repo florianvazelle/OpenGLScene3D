@@ -1,5 +1,5 @@
 mkdir build
 cd build
 cmake ..
-make -j 4
-./OpenGLScene3D
+make -j$(nproc)
+# ./OpenGLScene3D

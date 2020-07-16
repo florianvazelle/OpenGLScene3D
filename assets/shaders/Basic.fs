@@ -1,15 +1,18 @@
-uniform int u_type;
+#version 330 core
+out vec4 FragColor;
 
+uniform vec3 cameraPos;
 uniform vec3 lightPos;
+uniform sampler2D shadowMap;
+
 uniform vec3 ambientColor;
 uniform vec3 diffuseColor;
 uniform vec3 specColor;
 uniform float shininess;
-uniform sampler2D u_TextureSampler;
 
-varying vec3 v_normal;
-varying vec2 v_texcoord;
-varying vec3 v_modPos;
+in vec3 v_normal;
+in vec3 v_modPos;
+in vec4 ShadowCoord;
 
 const vec3 lightColor = vec3(1.0, 1.0, 1.0);
 const float lightPower = 40.0;
@@ -31,38 +34,39 @@ vec3 specular(vec3 N, vec3 L) {
 }
 
 void main() {
-  if (u_type == 1) {
-    const vec4 lum_diffus = vec4(1, 1, 0.9, 1);
-    const vec4 lum_amb = vec4(0.8, 0.8, 1, 1);
-    const vec4 lum_spec = vec4(1, 1, 0.75, 1);
-    const float Iamb = 0.15;
 
-    vec3 L = normalize(v_modPos - lightPos.xyz);
-    float Idiffuse = 0, Ispec = 0;
-    vec4 color = vec4(1);
-    vec3 N = normalize(v_normal);
+  vec3 N = normalize(v_normal);
+  vec3 L = lightPos - v_modPos;
 
-    vec3 B = cross(normalize(vec3(N.x, 0, N.z)), vec3(0, 1, 0));
-    vec3 T = cross(N, B);
-    Idiffuse = clamp(dot(N, -L), 0, 1);
+  float bias = 0.005 * tan(acos(dot(N, L)));
+  bias = clamp(bias, 0, 0.01);
 
-    color = texture2D(u_TextureSampler, v_texcoord);
-    gl_FragColor = lum_diffus * color * Idiffuse + lum_amb * Iamb * color +
-                   lum_spec * Ispec;
-  } else if (u_type == 2) {
-    gl_FragColor = vec4(v_normal, 1.0);
-  } else {
-    vec3 N = normalize(v_normal);
-    vec3 L = lightPos - v_modPos;
-    float distance = length(L);
-    distance = distance * distance;
-    L = normalize(L);
+  // float visibility = 1.0;
+  // if (texture(shadowMap, ShadowCoord.xy).z < ShadowCoord.z - bias) {
+  //   visibility = 0.5;
+  // }
 
-    vec3 colorLinear =
-        ambientColor +
-        diffuse(N, L) * lightColor * lightPower / distance +
-        specular(N, L) * lightColor * lightPower / distance;
-    vec3 colorGammaCorrected = pow(colorLinear, vec3(1.0 / screenGamma));
-    gl_FragColor = vec4(colorGammaCorrected, 1.0);
+  // Percentage Close Filter
+  float visibility = 0.0;
+  vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+  for (int x = -1; x <= 1; ++x) {
+    for (int y = -1; y <= 1; ++y) {
+      float pcfDepth =
+          texture(shadowMap, ShadowCoord.xy + vec2(x, y) * texelSize).z;
+      visibility += ShadowCoord.z > pcfDepth ? 0.5 : 0.0;
+    }
   }
+  visibility /= 9.0;
+
+  visibility = 1.0 - visibility;
+
+  float distance = length(L);
+  distance = distance * distance;
+  L = normalize(L);
+
+  vec3 colorLinear =
+      ambientColor +
+      (diffuse(N, L) * lightColor * lightPower / distance) * visibility;
+  vec3 colorGammaCorrected = pow(colorLinear, vec3(1.0 / screenGamma));
+  FragColor = vec4(colorGammaCorrected, 1.0);
 }
