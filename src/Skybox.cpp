@@ -102,35 +102,6 @@ void Skybox::Init() {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 }
 
-void Skybox::_check_gl_error(const char *file, int line) {
-  GLenum err(glGetError());
-  std::string error;
-
-  switch (err) {
-  case GL_INVALID_OPERATION:
-    error = "INVALID_OPERATION";
-    break;
-  case GL_INVALID_ENUM:
-    error = "INVALID_ENUM";
-    break;
-  case GL_INVALID_VALUE:
-    error = "INVALID_VALUE";
-    break;
-  case GL_OUT_OF_MEMORY:
-    error = "OUT_OF_MEMORY";
-    break;
-  case GL_INVALID_FRAMEBUFFER_OPERATION:
-    error = "INVALID_FRAMEBUFFER_OPERATION";
-    break;
-  }
-
-  std::cerr << "GL_" << error.c_str() << " - " << file << ":" << line
-            << std::endl;
-  if (err != GL_NO_ERROR) {
-    exit(1);
-  }
-}
-
 void Skybox::Draw(Mat4 viewMatrix, Mat4 proj3DMatrix) {
   // glDepthMask(GL_FALSE);
   glDepthFunc(GL_LEQUAL);

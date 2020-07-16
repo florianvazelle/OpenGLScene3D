@@ -15,10 +15,8 @@
 #include "Mat4.h"
 #include "Skybox.h"
 
-bool arcball_on = false, target_on = false;
-
 GLShader g_BasicShader, g_DepthBasicShader;
-GLObject g_Suzanne[2];
+GLObject g_Scene[2];
 GLCamera g_Camera;
 
 Skybox sb;
@@ -43,8 +41,8 @@ void Initialize(GLFWwindow *window) {
   g_DepthBasicShader.LoadFragmentShader("./assets/shaders/DepthBasic.fs");
   g_DepthBasicShader.Create();
 
-  g_Suzanne[0].LoadObject("./assets/models/scene.obj", g_BasicShader);
-  g_Suzanne[1].LoadObject("./assets/models/scene.obj", g_DepthBasicShader);
+  g_Scene[0].LoadObject("./assets/models/scene.obj", g_BasicShader);
+  g_Scene[1].LoadObject("./assets/models/scene.obj", g_DepthBasicShader);
 
   sb.Init();
 
@@ -53,8 +51,8 @@ void Initialize(GLFWwindow *window) {
 }
 
 void Shutdown() {
-  g_Suzanne[0].DestroyObject();
-  g_Suzanne[1].DestroyObject();
+  g_Scene[0].DestroyObject();
+  g_Scene[1].DestroyObject();
   g_BasicShader.Destroy();
   g_DepthBasicShader.Destroy();
   sb.Destroy();
@@ -120,7 +118,7 @@ void Display(GLFWwindow *window) {
     glUniformMatrix4fv(glGetUniformLocation(basic, "u_viewMatrix"), 1, GL_FALSE,
                        &(depthViewMatrix[0]));
 
-    g_Suzanne[1].DrawObject();
+    g_Scene[1].DrawObject();
   }
 
   // 2. then render scene as normal with shadow mapping (using depth map)
@@ -158,7 +156,7 @@ void Display(GLFWwindow *window) {
     glUniform3fv(glGetUniformLocation(basic, "cameraPos"), 1, cameraPos);
     glUniform3fv(glGetUniformLocation(basic, "lightPos"), 1, lightPos);
 
-    g_Suzanne[0].DrawObject();
+    g_Scene[0].DrawObject();
   }
 
   // En dernier la skybox
@@ -180,41 +178,6 @@ void Display(GLFWwindow *window) {
   }
 }
 
-void onMouse(GLFWwindow *window, int button, int state, int mods) {
-  if (button == GLFW_MOUSE_BUTTON_LEFT && state == GLFW_PRESS) {
-    arcball_on = true;
-  } else {
-    arcball_on = false;
-  }
-
-  if (button == GLFW_MOUSE_BUTTON_RIGHT && state == GLFW_PRESS) {
-    target_on = true;
-  } else {
-    target_on = false;
-  }
-}
-
-void onMotion(GLFWwindow *window, double x, double y) {
-  if (arcball_on) {
-    g_Camera.rotate(x, y);
-  }
-  if (target_on) {
-    g_Camera.change(x, y);
-  }
-}
-
-void onScroll(GLFWwindow *window, double x, double y) { g_Camera.zoom(y); }
-
-void onKey(GLFWwindow *window, int key, int scancode, int action, int mods) {
-  if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-    g_Camera.focus({0, 0, 0});
-  } else if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
-    g_Camera.focus({0.15, 0, 0});
-  } else if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
-    g_Camera.focus({-0.15, 0, 0});
-  }
-}
-
 int main(void) {
   GLFWwindow *window;
 
@@ -230,11 +193,6 @@ int main(void) {
 
   glfwMakeContextCurrent(window);
   Initialize(window);
-
-  glfwSetCursorPosCallback(window, onMotion);
-  glfwSetMouseButtonCallback(window, onMouse);
-  glfwSetScrollCallback(window, onScroll);
-  glfwSetKeyCallback(window, onKey);
 
   while (!glfwWindowShouldClose(window)) {
     Display(window);

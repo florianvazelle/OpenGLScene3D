@@ -15,8 +15,6 @@
 #include "Mat4.h"
 #include "Skybox.h"
 
-bool arcball_on = false, target_on = false;
-
 GLShader g_BasicShader;
 GLObject g_Suzanne;
 GLCamera g_Camera;
@@ -100,41 +98,6 @@ void Display(GLFWwindow *window) {
   sb.Draw(viewMatrix, proj3DMatrix);
 }
 
-void onMouse(GLFWwindow *window, int button, int state, int mods) {
-  if (button == GLFW_MOUSE_BUTTON_LEFT && state == GLFW_PRESS) {
-    arcball_on = true;
-  } else {
-    arcball_on = false;
-  }
-
-  if (button == GLFW_MOUSE_BUTTON_RIGHT && state == GLFW_PRESS) {
-    target_on = true;
-  } else {
-    target_on = false;
-  }
-}
-
-void onMotion(GLFWwindow *window, double x, double y) {
-  if (arcball_on) {
-    g_Camera.rotate(x, y);
-  }
-  if (target_on) {
-    g_Camera.change(x, y);
-  }
-}
-
-void onScroll(GLFWwindow *window, double x, double y) { g_Camera.zoom(y); }
-
-void onKey(GLFWwindow *window, int key, int scancode, int action, int mods) {
-  if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-    g_Camera.focus({0, 0, 0});
-  } else if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
-    g_Camera.focus({0.15, 0, 0});
-  } else if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
-    g_Camera.focus({-0.15, 0, 0});
-  }
-}
-
 int main(void) {
   GLFWwindow *window;
 
@@ -150,11 +113,6 @@ int main(void) {
 
   glfwMakeContextCurrent(window);
   Initialize(window);
-
-  glfwSetCursorPosCallback(window, onMotion);
-  glfwSetMouseButtonCallback(window, onMouse);
-  glfwSetScrollCallback(window, onScroll);
-  glfwSetKeyCallback(window, onKey);
 
   while (!glfwWindowShouldClose(window)) {
     Display(window);

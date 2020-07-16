@@ -43,8 +43,8 @@ void FrameBufferObject::Init(GLFWwindow *window) {
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
                          m_depthbuffer, 0);
 
-  glDrawBuffer(GL_NONE); // tres important, autrement FBO non complet!
-  glReadBuffer(GL_NONE);
+  // glDrawBuffer(GL_NONE);
+  // glReadBuffer(GL_NONE);
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glBindTexture(GL_TEXTURE_2D, 0);

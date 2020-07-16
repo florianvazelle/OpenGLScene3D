@@ -3,7 +3,7 @@
 #include <iostream>
 
 GLCamera::GLCamera() {
-  m_radius = 50.0f;
+  m_radius = 1.0f;
   m_phi = 0.0f;
   m_theta = 0.0f;
 
@@ -56,8 +56,8 @@ Mat4 GLCamera::viewMatrix() {
   eye.z = m_radius * cos(m_theta) * sin(m_phi);
 
   const float radius = 50.0f;
-  float camX = sin(glfwGetTime() / 2);
-  float camZ = cos(glfwGetTime() / 2);
+  float camX = sin(glfwGetTime() / 2) * m_radius;
+  float camZ = cos(glfwGetTime() / 2) * m_radius;
 
   Mat4 viewMatrix;
   viewMatrix.lookAt({camX, 0.5, camZ}, {0.0, 0.0, 0.0}, {0, 1, 0});

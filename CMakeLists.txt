@@ -21,6 +21,11 @@ include_directories(${PROJECT_SOURCE_DIR}/libs)
 file(GLOB_RECURSE ${PROJECT_NAME}_HEADERS ${PROJECT_SOURCE_DIR}/include/*.h)
 file(GLOB_RECURSE ${PROJECT_NAME}_SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
+# Scene
+set(SCENE_SOURCES  ${${PROJECT_NAME}_SOURCES} example/Scene.cpp)
+add_executable(scene ${SCENE_SOURCES} ${${PROJECT_NAME}_HEADERS})
+target_link_libraries(scene glfw ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES})
+
 # Sky
 set(SKY_SOURCES  ${${PROJECT_NAME}_SOURCES} example/Sky.cpp)
 add_executable(sky ${SKY_SOURCES} ${${PROJECT_NAME}_HEADERS})

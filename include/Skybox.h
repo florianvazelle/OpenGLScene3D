@@ -8,7 +8,6 @@ public:
   void Init();
   void Draw(Mat4, Mat4);
   void Destroy();
-  static void _check_gl_error(const char *file, int line);
   GLuint getSpaceTexId() const { return _spaceTexId; };
 
 private:
